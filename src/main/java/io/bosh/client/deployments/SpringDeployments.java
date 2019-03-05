@@ -1,39 +1,32 @@
-/*
- * Copyright 2015 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package io.bosh.client.deployments;
-
-import io.bosh.client.DirectorException;
-import io.bosh.client.internal.AbstractSpringOperations;
-import io.bosh.client.tasks.Tasks;
-
-import java.io.IOException;
-import java.net.URI;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.web.client.RestTemplate;
-
-import rx.Observable;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import io.bosh.client.DirectorException;
+import io.bosh.client.internal.AbstractSpringOperations;
+import io.bosh.client.tasks.Task;
+import io.bosh.client.tasks.Tasks;
+
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
+import rx.Observable;
+
+import java.io.IOException;
+import java.net.URI;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 
 /**
- * @author David Ehringer
+ * @author David Ehringer, Jannik Heyl, Johannes Hiemer.
  */
 public class SpringDeployments extends AbstractSpringOperations implements Deployments {
 
@@ -41,6 +34,7 @@ public class SpringDeployments extends AbstractSpringOperations implements Deplo
     
     public SpringDeployments(RestTemplate restTemplate, URI root, Tasks tasks) {
         super(restTemplate, root);
+        restTemplate.getRequestFactory();
         this.tasks = tasks;
     }
 
@@ -58,17 +52,46 @@ public class SpringDeployments extends AbstractSpringOperations implements Deplo
                    builder -> builder.pathSegment("deployments", deploymentName))
                .map(response -> {
                    response.setName(deploymentName);
-
-                   ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-                   Map manifestMap = null;
-                   try {
-                       manifestMap = mapper.readValue(response.getRawManifest(), Map.class);
-                   } catch (IOException e) {
-                       throw new DirectorException("Unable to parse deployment manifest", e);
+                   if(response.getManifest() != null) {
+                       ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+                       Map manifestMap = null;
+                       try {
+                           manifestMap = mapper.readValue(response.getRawManifest(), Map.class);
+                       } catch (IOException e) {
+                           throw new DirectorException("Unable to parse deployment manifest", e);
+                       }
+                       response.setManifestMap(manifestMap);
                    }
-                   response.setManifestMap(manifestMap);
                    return response;
                });
+    }
+
+    @Override
+    public Observable<Task> create(Deployment deployment) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", "text/yaml");
+        return create(deployment, headers);
+    }
+
+    public Observable<Task> update(Deployment deployment) {
+        return create(deployment);
+    }
+
+    @Override
+    public Observable<Task> create(Deployment deployment, HttpHeaders headers) {
+        return exchangeWithTaskRedirect(deployment.getRawManifest(),
+                                        Task.class,
+                                        headers,
+                                        HttpMethod.POST,
+                    builder -> builder.path("deployments"))
+                .map(exchange -> exchange.getBody());
+    }
+
+    @Override
+    public Observable<Task> delete(Deployment deployment) {
+        return exchangeWithTaskRedirect("", Task.class, null, HttpMethod.DELETE,
+                builder -> builder.pathSegment("deployments", deployment.getName()))
+                .map(exchange -> exchange.getBody());
     }
 
     @Override

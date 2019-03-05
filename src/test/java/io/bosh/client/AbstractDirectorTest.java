@@ -17,11 +17,6 @@ package io.bosh.client;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-
-import io.bosh.client.DirectorClient;
-import io.bosh.client.SpringDirectorClient;
-import io.bosh.client.SpringDirectorClientBuilder;
-
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.util.FileCopyUtils;
@@ -36,11 +31,14 @@ public abstract class AbstractDirectorTest {
 
     {
         SpringDirectorClient springClient = new SpringDirectorClientBuilder()
-                .withHost("192.168.50.4").withCredentials("admin", "admin").build();
+                .withScheme(Scheme.https)
+                .withHost("192.168.50.4")
+                .withPort(25555)
+                .withCredentials("admin", "admin", Authentication.BASIC).build();
         mockServer = MockRestServiceServer.createServer(springClient.restTemplate());
         client = springClient;
     }
-    
+
 
     protected String url(String url) {
         return "https://192.168.50.4:25555" + url;
