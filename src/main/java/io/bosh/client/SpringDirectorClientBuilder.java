@@ -132,9 +132,8 @@ public class SpringDirectorClientBuilder {
         List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
         messageConverters.add(new StringHttpMessageConverter());
         MappingJackson2HttpMessageConverter messageConverter = new MappingJackson2HttpMessageConverter();
-        messageConverter.setSupportedMediaTypes(Arrays.asList(new MediaType("application", "json",
-                        DEFAULT_CHARSET), new MediaType("application", "*+json", DEFAULT_CHARSET),
-                new MediaType("text", "html", DEFAULT_CHARSET)));
+        messageConverter.setSupportedMediaTypes(Arrays.asList(new MediaType("application", "json"), new MediaType("application", "*+json"),
+                new MediaType("text", "html")));
         messageConverters.add(messageConverter);
         restTemplate.setMessageConverters(messageConverters);
     }
