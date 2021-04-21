@@ -5,29 +5,31 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 /**
  * @author David Ehringer, Yannic Remmet.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class Vm {
 
-    @JsonProperty("vm_cid")
+    private String id;
     private String vmCid;
     private List<String> ips = new ArrayList<String>();
     private List<String> dns = new ArrayList<String>();
-    @JsonProperty("agent_id")
     private String agentId;
-    @JsonProperty("job_name")
     private String jobName;
-    @JsonProperty("job_state")
     private String jobState;
     private int index;
-    @JsonProperty("resource_pool")
     private String resourcePool;
     private VmVitals vitals;
-    @JsonProperty("resurrection_paused")
     private boolean resurrectionPaused;
+
+    public String getId() {
+        return id;
+    }
 
     public String getVmCid() {
         return vmCid;

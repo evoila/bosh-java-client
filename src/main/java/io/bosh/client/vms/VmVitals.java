@@ -5,11 +5,14 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 /**
  * @author David Ehringer
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class VmVitals {
 
     private Cpu cpu;
@@ -17,7 +20,6 @@ public class VmVitals {
     private List<String> load = new ArrayList<String>();
     private Memory mem;
     private Memory swap;
-    @JsonProperty("resurrection_paused")
     private boolean resurrectionPaused;
 
     public Cpu getCpu() {
@@ -45,6 +47,7 @@ public class VmVitals {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
     public static class Cpu {
 
         private String sys;
@@ -71,6 +74,7 @@ public class VmVitals {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
     public static class Disk {
         private DiskUsage ephemeral;
         private DiskUsage persistent;
@@ -101,11 +105,10 @@ public class VmVitals {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
     public static class DiskUsage {
 
-        @JsonProperty("inode_percent")
         private int inodePercent;
-        @JsonProperty("percent")
         private int percent;
 
         public int getInodePercent() {
@@ -124,6 +127,7 @@ public class VmVitals {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
     public static class Memory {
 
         private int kb;
