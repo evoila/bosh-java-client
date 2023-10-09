@@ -1,30 +1,30 @@
 package io.bosh.client.info;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 import io.bosh.client.AbstractDirectorTest;
 import io.bosh.client.info.Info;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
 /**
  * @author David Ehringer
  */
-public class InfoTest extends AbstractDirectorTest{
+class InfoTest extends AbstractDirectorTest {
 
     private Info info;
 
-    @Before
-    public void setup(){
+    @BeforeEach
+    void setup(){
         info = client.info();
     }
 
     @Test
-    public void info() {
+    void info() {
         // Given
         mockServer.expect(requestTo(url("/info")))//
                 .andRespond(withSuccess(payload("info/info-bosh-lite.json"), MediaType.TEXT_HTML));

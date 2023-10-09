@@ -1,9 +1,9 @@
 package io.bosh.client.jobs;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 import io.bosh.client.AbstractDirectorTest;
@@ -17,8 +17,8 @@ import java.io.File;
 import java.io.InputStream;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -28,17 +28,17 @@ import rx.observers.TestSubscriber;
 /**
  * @author David Ehringer
  */
-public class JobsTest extends AbstractDirectorTest{
+class JobsTest extends AbstractDirectorTest {
 
     private Jobs jobs;
 
-    @Before
-    public void setup(){
+    @BeforeEach
+    void setup(){
         jobs = client.jobs();
     }
 
     @Test
-    public void fetchLogs() {
+    void fetchLogs() {
         // Given
         HttpHeaders headers = new HttpHeaders();
         headers.set("Location", "https://10.174.52.151/tasks/3307");
@@ -73,19 +73,17 @@ public class JobsTest extends AbstractDirectorTest{
         subscriber.assertNoErrors();
         subscriber.assertCompleted();
         InputStream response = subscriber.getOnNextEvents().get(0);
-        try {
+        assertDoesNotThrow(() -> {
             File logs = File.createTempFile("fetchLogs-", ".tgz");
             FileUtils.copyInputStreamToFile(response, logs);
             assertTrue(logs.length() > 150000);
-        } catch (Exception e) {
-            fail(e.getMessage());
-        } 
+        }); 
         
         mockServer.verify();
     }
 
     @Test
-    public void stopJob() {
+    void stopJob() {
         // Given
         mockServer
             .expect(requestTo(url("/deployments/cf-redis-61423dfddec885b6e28d")))//

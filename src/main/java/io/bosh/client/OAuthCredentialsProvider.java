@@ -1,11 +1,10 @@
 package io.bosh.client;
 
-import org.apache.http.Header;
-import org.apache.http.HeaderElement;
-import org.apache.http.ParseException;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.Credentials;
-import org.apache.http.client.CredentialsProvider;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HeaderElement;
+import org.apache.hc.core5.http.ParseException;
+import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.Credentials;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.token.AccessTokenProvider;
 import org.springframework.security.oauth2.client.token.AccessTokenProviderChain;
@@ -52,7 +51,7 @@ public class OAuthCredentialsProvider implements Header {
     }
 
     private void refreshAccessToken() {
-        Assert.notNull(token);
+        Assert.notNull(token, "token is null");
 
         token = CHAIN.refreshAccessToken(credentials, token.getRefreshToken(), new DefaultAccessTokenRequest());
     }
@@ -77,8 +76,12 @@ public class OAuthCredentialsProvider implements Header {
         return token.getTokenType()+ " "+ token.getValue();
     }
 
-    @Override
     public HeaderElement[] getElements() throws ParseException {
         return new HeaderElement[0];
+    }
+
+    @Override
+    public boolean isSensitive() {
+        return false;
     }
 }

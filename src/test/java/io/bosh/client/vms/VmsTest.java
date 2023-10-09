@@ -1,18 +1,18 @@
 package io.bosh.client.vms;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 import io.bosh.client.AbstractDirectorTest;
 
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
@@ -21,17 +21,17 @@ import rx.observers.TestSubscriber;
 /**
  * @author David Ehringer
  */
-public class VmsTest extends AbstractDirectorTest{
+class VmsTest extends AbstractDirectorTest {
 
     private Vms vms;
 
-    @Before
-    public void setup(){
+    @BeforeEach
+    void setup(){
         vms = client.vms();
     }
 
     @Test
-    public void list() {
+    void list() {
         // Given
         mockServer.expect(requestTo(url("/deployments/example/vms")))//
                 .andRespond(withSuccess(payload("vms/vms.json"), MediaType.TEXT_HTML));
@@ -47,7 +47,7 @@ public class VmsTest extends AbstractDirectorTest{
     }
 
     @Test
-    public void listDetails() {
+    void listDetails() {
         // Given
         HttpHeaders headers = new HttpHeaders();
         headers.set("Location", "https://10.174.52.151/tasks/3307");
