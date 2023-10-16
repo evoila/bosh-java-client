@@ -106,7 +106,7 @@ public class SpringDirectorClientBuilder {
         }
 
         SSLConnectionSocketFactory connectionFactory = SSLConnectionSocketFactoryBuilder.create()
-                .setSslContext(sslContext).setTlsVersions(TLS.V_1_3).setHostnameVerifier(new NoopHostnameVerifier())
+                .setSslContext(sslContext).setTlsVersions(TLS.V_1_3, TLS.V_1_2, TLS.V_1_1, TLS.V_1_0).setHostnameVerifier(new NoopHostnameVerifier())
                 .build();
 
         HttpClient httpClient;
