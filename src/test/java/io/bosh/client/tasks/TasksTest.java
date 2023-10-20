@@ -1,13 +1,13 @@
 package io.bosh.client.tasks;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 import io.bosh.client.AbstractDirectorTest;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
 import rx.observers.TestSubscriber;
@@ -15,17 +15,17 @@ import rx.observers.TestSubscriber;
 /**
  * @author David Ehringer
  */
-public class TasksTest extends AbstractDirectorTest{
+class TasksTest extends AbstractDirectorTest {
 
     private Tasks tasks;
 
-    @Before
-    public void setup(){
+    @BeforeEach
+    void setup(){
         tasks = client.tasks();
     }
 
     @Test
-    public void listRunning() {
+    void listRunning() {
         // Given
         mockServer.expect(requestTo(url("/tasks?state=processing,cancelling,queued")))//
                 .andRespond(withSuccess(payload("tasks/running-tasks.json"), MediaType.TEXT_HTML));
@@ -39,7 +39,7 @@ public class TasksTest extends AbstractDirectorTest{
     }
 
     @Test
-    public void listRecent() {
+    void listRecent() {
         // Given
         mockServer.expect(requestTo(url("/tasks?limit=30&verbose=1")))//
                 .andRespond(withSuccess(payload("tasks/recent-tasks.json"), MediaType.TEXT_HTML));
@@ -51,7 +51,7 @@ public class TasksTest extends AbstractDirectorTest{
     }
 
     @Test
-    public void listRecentWithCount() {
+    void listRecentWithCount() {
         // Given
         mockServer.expect(requestTo(url("/tasks?limit=50&verbose=1")))//
                 .andRespond(withSuccess(payload("tasks/recent-tasks.json"), MediaType.TEXT_HTML));
@@ -60,7 +60,7 @@ public class TasksTest extends AbstractDirectorTest{
     }
 
     @Test
-    public void get() {
+    void get() {
         // Given
         mockServer.expect(requestTo(url("/tasks/68")))//
                 .andRespond(withSuccess(payload("tasks/in-progress-task.json"), MediaType.TEXT_HTML));
@@ -74,10 +74,10 @@ public class TasksTest extends AbstractDirectorTest{
             assertThat(response.getUser(), is("admin"));
         });
     }
-    
+
 
     @Test
-    public void trackToCompletion() {
+    void trackToCompletion() {
         // Given
         mockServer.expect(requestTo(url("/tasks/68")))//
                 .andRespond(withSuccess(payload("tasks/in-progress-task.json"), MediaType.TEXT_HTML));

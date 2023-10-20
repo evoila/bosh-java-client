@@ -1,29 +1,29 @@
 package io.bosh.client.stemcells;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 import io.bosh.client.AbstractDirectorTest;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
 /**
  * @author David Ehringer
  */
-public class StemcellsTest extends AbstractDirectorTest{
+class StemcellsTest extends AbstractDirectorTest {
 
     private Stemcells stemcells;
 
-    @Before
-    public void setup(){
+    @BeforeEach
+    void setup(){
         stemcells = client.stemcells();
     }
 
     @Test
-    public void list() {
+    void list() {
         // Given
         mockServer.expect(requestTo(url("/stemcells")))//
                 .andRespond(withSuccess(payload("stemcells/stemcells.json"), MediaType.TEXT_HTML));

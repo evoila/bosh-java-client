@@ -15,30 +15,30 @@
  */
 package io.bosh.client.errands;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 import io.bosh.client.AbstractDirectorTest;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
 /**
  * @author David Ehringer
  */
-public class ErrandsTest extends AbstractDirectorTest{
+class ErrandsTest extends AbstractDirectorTest {
 
     private Errands errands;
 
-    @Before
-    public void setup(){
+    @BeforeEach
+    void setup(){
         errands = client.errands();
     }
 
     @Test
-    public void list() {
+    void list() {
         // Given
         mockServer.expect(requestTo(url("/deployments/test/errands")))//
                 .andRespond(withSuccess(payload("errands/errands.json"), MediaType.TEXT_HTML));

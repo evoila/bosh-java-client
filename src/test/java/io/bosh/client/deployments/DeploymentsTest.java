@@ -1,9 +1,9 @@
 package io.bosh.client.deployments;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
@@ -11,9 +11,9 @@ import io.bosh.client.AbstractDirectorTest;
 
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -23,17 +23,17 @@ import rx.observers.TestSubscriber;
 /**
  * @author David Ehringer
  */
-public class DeploymentsTest extends AbstractDirectorTest{
+class DeploymentsTest extends AbstractDirectorTest {
 
     private Deployments deployments;
 
-    @Before
-    public void setup(){
+    @BeforeEach
+    void setup(){
         deployments = client.deployments();
     }
 
     @Test
-    public void list() {
+    void list() {
         // Given
         mockServer.expect(requestTo(url("/deployments")))//
                 .andRespond(withSuccess(payload("deployments/deployments.json"), MediaType.TEXT_HTML));
@@ -50,7 +50,7 @@ public class DeploymentsTest extends AbstractDirectorTest{
 
     @SuppressWarnings("rawtypes")
     @Test
-    public void get() {
+    void get() {
         // Given
         mockServer.expect(requestTo(url("/deployments/cf-redis-61423dfddec885b6e28d")))//
                 .andRespond(withSuccess(payload("deployments/deployment.json"), MediaType.TEXT_HTML));
@@ -65,9 +65,9 @@ public class DeploymentsTest extends AbstractDirectorTest{
             assertThat(((List)response.getManifest().get("releases")).size(), is(1));
         });
     }
-    
+
     @Test
-    public void cloudcheckClean() {
+    void cloudcheckClean() {
         // Given
         HttpHeaders headers = new HttpHeaders();
         headers.set("Location", "https://10.174.52.151/tasks/3307");
@@ -94,10 +94,10 @@ public class DeploymentsTest extends AbstractDirectorTest{
         
         mockServer.verify();
     }
-    
+
     @Test
-    @Ignore("Need to get an example response")
-    public void cloudcheckProblems() {
+    @Disabled("Need to get an example response")
+    void cloudcheckProblems() {
         // Given
         HttpHeaders headers = new HttpHeaders();
         headers.set("Location", "https://10.174.52.151/tasks/3307");

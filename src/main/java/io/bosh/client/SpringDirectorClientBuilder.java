@@ -1,6 +1,5 @@
 package io.bosh.client;
 
-import static org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter.DEFAULT_CHARSET;
 
 import java.io.IOException;
 import java.net.URI;
@@ -12,23 +11,26 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import javax.net.ssl.SSLContext;
 
 import io.bosh.client.Authentication;
 import io.bosh.client.DirectorException;
 import io.bosh.client.RequestLoggingInterceptor;
 import io.bosh.client.SpringDirectorClient;
-import org.apache.http.Header;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.HttpClient;
-import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.SSLContexts;
-import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.io.HttpClientConnectionManager;
+import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.CredentialsProvider;
+import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
+import org.apache.hc.client5.http.ssl.TrustSelfSignedStrategy;
+import org.apache.hc.core5.http.ssl.TLS;
+import org.apache.hc.core5.ssl.SSLContexts;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.*;
@@ -44,6 +46,8 @@ import org.springframework.security.oauth2.client.token.grant.password.ResourceO
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.security.oauth2.common.*;
+
+import javax.net.ssl.SSLContext;
 
 /**
  * @author David Ehringer, Jannik Heyl.
@@ -96,31 +100,33 @@ public class SpringDirectorClientBuilder {
         SSLContext sslContext = null;
         try {
             sslContext = SSLContexts.custom()
-                    .loadTrustMaterial(null, new TrustSelfSignedStrategy()).useTLS().build();
+                    .loadTrustMaterial(null, new TrustSelfSignedStrategy()).build();
         } catch (KeyManagementException | NoSuchAlgorithmException | KeyStoreException e) {
             throw new DirectorException("Unable to configure ClientHttpRequestFactory", e);
         }
 
-        SSLConnectionSocketFactory connectionFactory = new SSLConnectionSocketFactory(sslContext,
-                new AllowAllHostnameVerifier());
+        SSLConnectionSocketFactory connectionFactory = SSLConnectionSocketFactoryBuilder.create()
+                .setSslContext(sslContext).setTlsVersions(TLS.V_1_3, TLS.V_1_2, TLS.V_1_1, TLS.V_1_0).setHostnameVerifier(new NoopHostnameVerifier())
+                .build();
 
         HttpClient httpClient;
 
+        HttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create().setSSLSocketFactory(connectionFactory).build();
         if(auth.equals(Authentication.BASIC)){
-            CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+            BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
             credentialsProvider.setCredentials(new AuthScope(host, 25555),
-                    new UsernamePasswordCredentials(username, password));
+                    new UsernamePasswordCredentials(username, password.toCharArray()));
 
             // disabling redirect handling is critical for the way BOSH uses 302's
             httpClient = HttpClientBuilder.create().disableRedirectHandling()
                     .setDefaultCredentialsProvider(credentialsProvider)
-                    .setSSLSocketFactory(connectionFactory).build();
+                    .setConnectionManager(connectionManager).build();
         } else {
 
             // disabling redirect handling is critical for the way BOSH uses 302's
             httpClient = HttpClientBuilder.create().disableRedirectHandling()
                     .setDefaultHeaders(Arrays.asList(new OAuthCredentialsProvider(host, username, password)))
-                    .setSSLSocketFactory(connectionFactory).build();
+                    .setConnectionManager(connectionManager).build();
 
         }
 

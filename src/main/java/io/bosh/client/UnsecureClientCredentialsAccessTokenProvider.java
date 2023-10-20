@@ -1,9 +1,10 @@
 package io.bosh.client;
-
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.TrustStrategy;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
+import org.apache.hc.core5.ssl.TrustStrategy;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsAccessTokenProvider;
@@ -29,7 +30,7 @@ public class UnsecureClientCredentialsAccessTokenProvider extends ClientCredenti
 
         SSLContext sslContext = null;
         try {
-            sslContext = org.apache.http.conn.ssl.SSLContexts.custom()
+            sslContext = org.apache.hc.core5.ssl.SSLContexts.custom()
                     .loadTrustMaterial(null, acceptingTrustStrategy)
                     .build();
         } catch (NoSuchAlgorithmException e) {
@@ -42,8 +43,10 @@ public class UnsecureClientCredentialsAccessTokenProvider extends ClientCredenti
 
         SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext);
 
+        PoolingHttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
+                .setSSLSocketFactory(csf).build();
         CloseableHttpClient httpClient = HttpClients.custom()
-                .setSSLSocketFactory(csf)
+                .setConnectionManager(connectionManager)
                 .build();
 
         HttpComponentsClientHttpRequestFactory requestFactory =
