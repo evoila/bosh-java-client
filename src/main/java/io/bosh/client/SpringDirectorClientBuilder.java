@@ -31,6 +31,8 @@ import org.apache.hc.client5.http.ssl.TrustSelfSignedStrategy;
 import org.apache.hc.core5.http.ssl.TLS;
 import org.apache.hc.core5.ssl.SSLContexts;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.*;
@@ -60,6 +62,7 @@ public class SpringDirectorClientBuilder {
     private String username;
     private String password;
     private Authentication auth;
+    private final static org.slf4j.Logger log = LoggerFactory.getLogger(SpringDirectorClientBuilder.class);
 
     public SpringDirectorClientBuilder withCredentials(String username, String password, Authentication auth){
         this.username = username;
@@ -152,7 +155,12 @@ public class SpringDirectorClientBuilder {
             ClientHttpResponse response = execution.execute(request, body);
             // some BOSH resources return text/plain and this modifies this response
             // so we can use Jackson
-            response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+            try {
+                HttpHeaders.writableHttpHeaders(response.getHeaders()).setContentType(MediaType.APPLICATION_JSON);
+            }
+            catch (Exception ex) {
+                log.warn(ex.getMessage());
+            }
             return response;
         }
 
