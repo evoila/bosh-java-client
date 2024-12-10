@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.evoila</groupId>
 	<artifactId>bosh-java-client</artifactId>
-	<version>1.3.27</version>
+	<version>1.3.27-SNAPSHOT</version>
 	<name>BOSH Java Client</name>
 	<description>A Java client for the BOSH Director API.</description>
 	<url>https://github.com/evoila/bosh-java-client</url>
